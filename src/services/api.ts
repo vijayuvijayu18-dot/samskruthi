@@ -15,7 +15,14 @@ import {
 
 export type { HeritagePost, HeritageStory, SuggestedAccount };
 
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+// Production-safe API base configuration
+// Enforces relative '/api' on production so deployed sites never call localhost
+const envApiUrl = import.meta.env.VITE_API_URL;
+const isProd = import.meta.env.PROD;
+
+const API_BASE = (isProd && (!envApiUrl || envApiUrl.includes('localhost') || envApiUrl.startsWith('/')))
+  ? '/api'
+  : (envApiUrl || (isProd ? '/api' : 'http://localhost:5000/api'));
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('samskruthi_token') || sessionStorage.getItem('samskruthi_token');
