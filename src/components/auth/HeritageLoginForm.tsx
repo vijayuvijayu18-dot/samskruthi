@@ -30,8 +30,8 @@ export const HeritageLoginForm: React.FC<HeritageLoginFormProps> = ({
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [acceptTerms, setAcceptTerms] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -137,10 +137,6 @@ export const HeritageLoginForm: React.FC<HeritageLoginFormProps> = ({
       }
       if (password.length < 6) {
         setErrorMsg('Password must be at least 6 characters');
-        return;
-      }
-      if (!acceptTerms) {
-        setErrorMsg('Please confirm you are at least 13 and accept the Terms of Service & Privacy Policy');
         return;
       }
     }

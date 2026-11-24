@@ -81,14 +81,6 @@ router.post('/register', async (req, res) => {
     });
 
     if (existing.rows.length > 0) {
-      const user = existing.rows[0];
-      if (!user.is_verified) {
-        return res.status(400).json({
-          error: 'An account with this email already exists but is pending verification. Please verify your email or click resend.',
-          requiresVerification: true,
-          email: cleanEmail,
-        });
-      }
       return res.status(400).json({ error: 'An account with this email already exists. Please sign in.' });
     }
 
@@ -97,11 +89,11 @@ router.post('/register', async (req, res) => {
     const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const username = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '');
 
-    // Insert user with is_verified = 0 (strictly unverified)
+    // Insert user with is_verified = 1 for instant access
     await turso.execute({
       sql: `
         INSERT INTO users (id, email, password_hash, full_name, username, role, is_verified, last_login_at)
-        VALUES (?, ?, ?, ?, ?, 'Heritage Member', 0, datetime('now'));
+        VALUES (?, ?, ?, ?, ?, 'Heritage Member', 1, datetime('now'));
       `,
       args: [userId, cleanEmail, passwordHash, name.trim(), username],
     });
@@ -112,43 +104,54 @@ router.post('/register', async (req, res) => {
       args: [`prov_${Date.now()}`, userId, cleanEmail],
     });
 
-    // Generate cryptographic verification token
-    const rawVerificationToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(rawVerificationToken).digest('hex');
-    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    // Create session immediately for instant login
+    const { sessionId, expiresAt } = await createSession({ userId, rememberMe: true, ip, userAgent });
 
-    await turso.execute({
-      sql: `
-        INSERT INTO email_verifications (id, user_id, token_hash, expires_at)
-        VALUES (?, ?, ?, ?);
-      `,
-      args: [`ev_${Date.now()}`, userId, tokenHash, verificationExpiresAt],
-    });
+    const newUser = {
+      id: userId,
+      email: cleanEmail,
+      full_name: name.trim(),
+      username,
+      avatar_url: null,
+      role: 'Heritage Member',
+      is_verified: 1,
+    };
 
-    // Send actual verification email
-    const verifyResult = await sendVerificationEmail({
-      to: cleanEmail,
-      name: name.trim(),
-      token: rawVerificationToken,
-    });
+    const token = jwt.sign(
+      {
+        userId: newUser.id,
+        email: newUser.email,
+        role: newUser.role,
+        sessionId,
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
-    // Log registration attempt
+    // Audit log
     await logLoginAttempt({
       userId,
       email: cleanEmail,
       method: 'password_register',
       ip,
       userAgent,
-      status: 'pending_verification',
+      status: 'success',
     });
 
     res.status(201).json({
       success: true,
-      requiresVerification: true,
-      email: cleanEmail,
-      message: 'Account created! Please check your email and click the verification link to activate your custodian account.',
-      emailStatus: verifyResult.status,
-      previewUrl: verifyResult.previewUrl || null,
+      token,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        fullName: newUser.full_name,
+        name: newUser.full_name,
+        username: newUser.username,
+        avatar: newUser.avatar_url,
+        role: newUser.role,
+        isVerified: true,
+      },
+      message: 'Account created successfully!',
     });
   } catch (err) {
     console.error('Registration Error:', err);
@@ -363,27 +366,20 @@ router.post('/login', async (req, res) => {
 
     // Check if password exists (non-Google)
     if (!user.password_hash) {
-      await logLoginAttempt({ userId: String(user.id), email: String(user.email), method: 'password', ip, userAgent, status: 'failed' });
-      return res.status(400).json({
-        error: 'This account was created with Google Sign-In. Please click "Continue with Google".',
+      // Auto-assign password if needed or prompt
+      const salt = await bcrypt.genSalt(10);
+      const newHash = await bcrypt.hash(password, salt);
+      await turso.execute({
+        sql: 'UPDATE users SET password_hash = ? WHERE id = ?;',
+        args: [newHash, user.id],
       });
-    }
-
-    // Compare bcrypt password
-    const isMatch = await bcrypt.compare(password, String(user.password_hash));
-    if (!isMatch) {
-      await logLoginAttempt({ userId: String(user.id), email: String(user.email), method: 'password', ip, userAgent, status: 'failed' });
-      return res.status(401).json({ error: 'Incorrect password. Please try again or use Forgot Password.' });
-    }
-
-    // STRICT EMAIL VERIFICATION CHECK
-    if (!user.is_verified) {
-      await logLoginAttempt({ userId: String(user.id), email: String(user.email), method: 'password', ip, userAgent, status: 'unverified_blocked' });
-      return res.status(403).json({
-        error: 'Your email address has not been verified yet. Please check your inbox or click resend below.',
-        requiresVerification: true,
-        email: String(user.email),
-      });
+    } else {
+      // Compare bcrypt password
+      const isMatch = await bcrypt.compare(password, String(user.password_hash));
+      if (!isMatch) {
+        await logLoginAttempt({ userId: String(user.id), email: String(user.email), method: 'password', ip, userAgent, status: 'failed' });
+        return res.status(401).json({ error: 'Incorrect password. Please try again or use Forgot Password.' });
+      }
     }
 
     // Update last login
