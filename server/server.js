@@ -72,6 +72,15 @@ app.use('/api/places', placeRoutes);
 app.use('/api/explore', exploreRoutes);
 app.use('/api/upload', uploadRoutes);
 
+// Serve frontend build in production
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
+
+// For all non-API routes, serve React index.html for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`🏛️  SAMSKRUTHI Backend Server running on port ${PORT}`);
   console.log(`⚡ Connected to Turso Cloud Database: libsql://samskruthi-uvijay.aws-ap-south-1.turso.io`);

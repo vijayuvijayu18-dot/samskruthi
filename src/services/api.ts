@@ -15,7 +15,7 @@ import {
 
 export type { HeritagePost, HeritageStory, SuggestedAccount };
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('samskruthi_token') || sessionStorage.getItem('samskruthi_token');
