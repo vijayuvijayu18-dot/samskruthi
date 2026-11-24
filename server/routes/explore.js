@@ -61,8 +61,16 @@ router.get('/', async (req, res) => {
       LIMIT 4;
     `);
 
+    // 5. Categories
+    const categoriesRes = await turso.execute(`
+      SELECT id, name, slug, description
+      FROM heritage_categories
+      ORDER BY name ASC;
+    `);
+
     res.json({
       places: placesRes.rows,
+      categories: categoriesRes.rows,
       creators: creatorsRes.rows.map((r) => ({
         ...r,
         handle: `@${r.username || 'custodian'}`,

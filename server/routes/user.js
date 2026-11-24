@@ -55,7 +55,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
       }),
     ]);
 
-    res.json({
+    const profileData = {
       id: String(u.id),
       name: String(u.full_name || ''),
       email: String(u.email || ''),
@@ -76,6 +76,11 @@ router.get('/profile', authenticateToken, async (req, res) => {
         followersCount: Number(followersRes.rows[0]?.count || 0),
         followingCount: Number(followingRes.rows[0]?.count || 0),
       },
+    };
+
+    res.json({
+      ...profileData,
+      user: profileData,
     });
   } catch (err) {
     console.error('Fetch profile error:', err);

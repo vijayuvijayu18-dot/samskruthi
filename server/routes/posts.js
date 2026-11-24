@@ -213,7 +213,7 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
         sql: 'UPDATE posts SET likes_count = MAX(0, likes_count - 1) WHERE id = ?;',
         args: [postId],
       });
-      return res.json({ liked: false });
+      return res.json({ success: true, liked: false });
     } else {
       // Add Like
       const likeId = `like_${Date.now()}`;
@@ -242,7 +242,7 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
         });
       }
 
-      return res.json({ liked: true });
+      return res.json({ success: true, liked: true });
     }
   } catch (err) {
     console.error('Like error:', err);

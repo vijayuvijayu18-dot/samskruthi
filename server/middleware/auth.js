@@ -13,6 +13,11 @@ export async function authenticateToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id || decoded.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid token payload: missing user identifier.' });
+    }
 
     // Verify session in Turso sessions table if sessionId is present
     if (decoded.sessionId) {
@@ -22,7 +27,7 @@ export async function authenticateToken(req, res, next) {
           FROM sessions 
           WHERE id = ? AND user_id = ?;
         `,
-        args: [decoded.sessionId, decoded.id],
+        args: [decoded.sessionId, userId],
       });
 
       if (sessionResult.rows.length === 0 || !sessionResult.rows[0].is_active) {
@@ -35,7 +40,7 @@ export async function authenticateToken(req, res, next) {
       }
     }
 
-    req.user = decoded;
+    req.user = { ...decoded, id: userId, userId };
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired authentication token.' });

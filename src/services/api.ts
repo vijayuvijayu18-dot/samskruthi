@@ -337,11 +337,11 @@ export const apiService = {
     try {
       const res = await fetch(`${API_BASE}/posts`, {
         headers: { ...getAuthHeader() },
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(15000),
       });
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
-      return data.length > 0 ? data : INITIAL_POSTS_DATA;
+      return Array.isArray(data) && data.length > 0 ? data : INITIAL_POSTS_DATA;
     } catch {
       return INITIAL_POSTS_DATA;
     }
@@ -428,10 +428,10 @@ export const apiService = {
 
   async getStories(): Promise<HeritageStory[]> {
     try {
-      const res = await fetch(`${API_BASE}/stories`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${API_BASE}/stories`, { signal: AbortSignal.timeout(15000) });
       if (!res.ok) throw new Error('Failed to fetch stories');
       const data = await res.json();
-      return data.length > 0 ? data : STORIES_DATA;
+      return Array.isArray(data) && data.length > 0 ? data : STORIES_DATA;
     } catch {
       return STORIES_DATA;
     }
@@ -723,10 +723,10 @@ export const apiService = {
 
   async getSlides(): Promise<HeritageSlide[]> {
     try {
-      const res = await fetch(`${API_BASE}/slides`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${API_BASE}/slides`, { signal: AbortSignal.timeout(15000) });
       if (!res.ok) throw new Error('Failed to fetch from API');
       const data = await res.json();
-      return data.length > 0 ? data : HERITAGE_SLIDES;
+      return Array.isArray(data) && data.length > 0 ? data : HERITAGE_SLIDES;
     } catch {
       return HERITAGE_SLIDES;
     }

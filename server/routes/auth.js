@@ -119,6 +119,7 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign(
       {
+        id: newUser.id,
         userId: newUser.id,
         email: newUser.email,
         role: newUser.role,
@@ -411,7 +412,7 @@ router.post('/login', async (req, res) => {
 
     // Issue JWT
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, sessionId },
+      { id: user.id, userId: user.id, email: user.email, role: user.role, sessionId },
       JWT_SECRET,
       { expiresIn: rememberMe ? '30d' : '24h' }
     );
@@ -800,26 +801,6 @@ router.post('/google/profile-sync', async (req, res) => {
   } catch (err) {
     console.error('Google Profile Sync Error:', err);
     res.status(500).json({ error: 'Failed to sync Google user with Turso: ' + err.message });
-  }
-});
-      token,
-      sessionId,
-      expiresAt,
-      isNewUser,
-      user: {
-        id: userId,
-        name,
-        email,
-        username,
-        avatar,
-        role: userRole,
-        isVerified: true,
-        authProvider: 'google',
-      },
-    });
-  } catch (err) {
-    console.error('Google Auth Verification Error:', err);
-    res.status(401).json({ error: 'Failed to verify Google Identity credential: ' + err.message });
   }
 });
 
