@@ -709,6 +709,100 @@ router.post('/google/verify', async (req, res) => {
     res.json({
       success: true,
       token,
+      user: {
+        id: userId,
+        email,
+        name,
+        fullName: name,
+        username,
+        avatar,
+        role: userRole,
+        isVerified: true,
+      },
+    });
+  } catch (err) {
+    console.error('Google Verify Error:', err);
+    res.status(401).json({ error: 'Google authentication failed: ' + err.message });
+  }
+});
+
+/**
+ * 8. POST /api/auth/google/profile-sync
+ * Syncs Google profile with Turso DB even if client tokens are unavailable
+ */
+router.post('/google/profile-sync', async (req, res) => {
+  const { name = 'Heritage Custodian', email, avatar, rememberMe = true } = req.body;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+  const username = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '');
+
+  try {
+    const existing = await turso.execute({
+      sql: 'SELECT id, email, full_name, username, avatar_url, role FROM users WHERE LOWER(email) = ?;',
+      args: [cleanEmail],
+    });
+
+    let userId;
+    let userRole = 'Heritage Custodian';
+    let userAvatar = avatar;
+    let userFullName = name;
+
+    if (existing.rows.length > 0) {
+      const u = existing.rows[0];
+      userId = String(u.id);
+      userRole = String(u.role || 'Heritage Custodian');
+      userAvatar = u.avatar_url || avatar;
+      userFullName = u.full_name || name;
+
+      await turso.execute({
+        sql: `UPDATE users SET last_login_at = datetime('now'), is_verified = 1 WHERE id = ?;`,
+        args: [userId],
+      });
+    } else {
+      userId = `usr_g_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      await turso.execute({
+        sql: `
+          INSERT INTO users (id, email, full_name, username, avatar_url, role, is_verified, last_login_at)
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'));
+        `,
+        args: [userId, cleanEmail, name, username, avatar, userRole],
+      });
+    }
+
+    const { sessionId } = await createSession({ userId, rememberMe, ip, userAgent });
+
+    const token = jwt.sign(
+      { id: userId, email: cleanEmail, role: userRole, sessionId },
+      JWT_SECRET,
+      { expiresIn: rememberMe ? '30d' : '24h' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: userId,
+        email: cleanEmail,
+        name: userFullName,
+        fullName: userFullName,
+        username,
+        avatar: userAvatar,
+        role: userRole,
+        isVerified: true,
+      },
+    });
+  } catch (err) {
+    console.error('Google Profile Sync Error:', err);
+    res.status(500).json({ error: 'Failed to sync Google user with Turso: ' + err.message });
+  }
+});
+      token,
       sessionId,
       expiresAt,
       isNewUser,

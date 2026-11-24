@@ -169,6 +169,17 @@ export const apiService = {
     return data;
   },
 
+  async googleProfileSync(payload: { name: string; email: string; avatar?: string; rememberMe?: boolean }) {
+    const res = await fetch(`${API_BASE}/auth/google/profile-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to sync Google profile');
+    return data;
+  },
+
   async register(name: string, email: string, password: string) {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',

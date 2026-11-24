@@ -105,11 +105,8 @@ export const HeritageLoginForm: React.FC<HeritageLoginFormProps> = ({
             auto_select: false,
             cancel_on_tap_outside: true,
           });
-
-          // Prompt Google One Tap
-          google.accounts.id.prompt();
         } catch (e) {
-          console.warn('Google One Tap init notice:', e);
+          console.warn('Google Identity init notice:', e);
         }
       }
     });

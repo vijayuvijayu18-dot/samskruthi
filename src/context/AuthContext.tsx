@@ -205,21 +205,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: string;
     avatar?: string;
   }): Promise<boolean> => {
-    // Convenience fallback: registers/logs in custodian on backend
+    setIsLoading(true);
     try {
-      const googleUser: User = {
-        id: `usr_g_${Date.now()}`,
-        name: profile.name.trim() || 'Vijay Kumar',
-        email: profile.email.trim() || 'vijay.heritage@gmail.com',
-        avatar: profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-        role: 'Heritage Custodian',
-        isVerified: true,
-        authProvider: 'google',
-      };
-      persistAuth(googleUser, 'jwt_google_direct_auth', true);
-      return true;
-    } catch {
+      const data = await apiService.googleProfileSync({
+        name: profile.name,
+        email: profile.email,
+        avatar: profile.avatar,
+        rememberMe: true,
+      });
+      if (data.token && data.user) {
+        persistAuth(data.user, data.token, true);
+        return true;
+      }
       return false;
+    } catch (err) {
+      console.error('Google profile sync error:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
