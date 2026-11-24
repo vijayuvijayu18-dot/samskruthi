@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="48" fill="#080c16" stroke="#d4af37" stroke-width="2.5" />
+  <circle cx="50" cy="50" r="42" stroke="url(#gold-grad)" stroke-width="1" stroke-dasharray="3 3" />
+  <!-- Temple arch / Kalasha motif -->
+  <path d="M50 18 L58 32 C65 42 70 52 70 65 C70 76 61 82 50 82 C39 82 30 76 30 65 C30 52 35 42 42 32 Z" fill="url(#saffron-grad)" opacity="0.9" />
+  <path d="M50 25 C54 35 62 48 62 60 C62 68 56 74 50 74 C44 74 38 68 38 60 C38 48 46 35 50 25 Z" fill="#d4af37" opacity="0.95" />
+  <circle cx="50" cy="62" r="4" fill="#080c16" />
+  <!-- Diya flame glow -->
+  <path d="M50 14 C51.5 17 53 20 50 23 C47 20 48.5 17 50 14 Z" fill="#ff7722" />
+  <defs>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3d979" />
+      <stop offset="50%" stop-color="#d4af37" />
+      <stop offset="100%" stop-color="#9a7412" />
+    </linearGradient>
+    <linearGradient id="saffron-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7722" />
+      <stop offset="100%" stop-color="#c85a32" />
+    </linearGradient>
+  </defs>
+</svg>
+

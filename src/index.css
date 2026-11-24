@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-heritage-dark: #080c16;
+  --color-heritage-darker: #04070d;
+  --color-heritage-surface: #101626;
+  --color-heritage-gold: #d4af37;
+  --color-heritage-saffron: #f97316;
+  --color-heritage-terracotta: #c85a32;
+  --color-heritage-emerald: #059669;
+  --color-heritage-peacock: #0891b2;
+  --color-heritage-indigo: #312e81;
+  --color-heritage-purple: #7e22ce;
+  --color-heritage-cream: #fdfbf7;
+
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-display: "Cinzel Decorative", "Playfair Display", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-kannada: "Noto Serif Kannada", "Noto Sans Kannada", sans-serif;
+}
+
+/* Custom Cursor: hide default cursor ONLY on pointer-capable devices when effect is active */
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor-active,
+  html.custom-cursor-active * {
+    cursor: none !important;
+  }
+
+  /* Always preserve system cursor for inputs and iframes */
+  html.custom-cursor-active input,
+  html.custom-cursor-active textarea,
+  html.custom-cursor-active select,
+  html.custom-cursor-active [contenteditable="true"],
+  html.custom-cursor-active iframe,
+  html.custom-cursor-active .leaflet-container {
+    cursor: auto !important;
+  }
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--color-heritage-dark);
+  color: #f1f5f9;
+}
+
+/* Focus styles for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-heritage-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Temple Arch & Architectural Clip Paths */
+.clip-temple-arch {
+  clip-path: polygon(
+    0% 25%,
+    15% 15%,
+    35% 5%,
+    50% 0%,
+    65% 5%,
+    85% 15%,
+    100% 25%,
+    100% 100%,
+    0% 100%
+  );
+}
+
+.clip-temple-gopuram {
+  clip-path: polygon(
+    50% 0%,
+    60% 12%,
+    75% 25%,
+    85% 42%,
+    100% 60%,
+    100% 100%,
+    0% 100%,
+    0% 60%,
+    15% 42%,
+    25% 25%,
+    40% 12%
+  );
+}
+
+.clip-torana {
+  clip-path: ellipse(75% 100% at 50% 100%);
+}
+
+/* Subtle Jali (Lattice) Background Pattern */
+.bg-jali-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(212, 175, 55, 0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.bg-kolam-grid {
+  background-image: 
+    linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Editorial & Heritage Gradients */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #ca8a04 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-saffron {
+  background: linear-gradient(135deg, #fdba74 0%, #f97316 50%, #c2410c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-heritage {
+  background: linear-gradient(135deg, #fbbf24 0%, #f97316 35%, #ec4899 70%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-peacock {
+  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #0d9488 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Card Glows */
+.gold-glow {
+  box-shadow: 0 0 25px -5px rgba(212, 175, 55, 0.2);
+}
+
+.gold-glow-hover:hover {
+  box-shadow: 0 0 35px -5px rgba(212, 175, 55, 0.35);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080c16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232d42;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+/* Leaflet theme adjustments */
+.leaflet-container {
+  background: #f7f2ea !important;
+  font-family: inherit !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #101626 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background: #101626 !important;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
