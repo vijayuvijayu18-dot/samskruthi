@@ -84,5 +84,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🏛️  SAMSKRUTHI Backend Server running on port ${PORT}`);
   console.log(`⚡ Connected to Turso Cloud Database: libsql://samskruthi-uvijay.aws-ap-south-1.turso.io`);
-  console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+  console.log(`🔗 API Base: /api (Port ${PORT})`);
 });
